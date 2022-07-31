@@ -1,0 +1,36 @@
+enclave {
+
+    trusted {
+        include "../Enclave/sgx_structs.h"
+        include "../Enclave/sgx_includes.h"
+        // define ECALLs here
+        public void ecall_init([user_check]FILE *stdi, [user_check]FILE *stdo, [user_check]FILE *stde);
+        public void ecall_start(int fd, [in, count=1, size=len] uint8_t *buffer, uint32_t len);
+        public void ecall_gen_keypair();
+        public void ecall_register_client_key([in, count=1, size=k] uint8_t *key, size_t k);
+        public void ecall_get_server_key([out, count=1, size=k] uint8_t *key, size_t k);
+        public void ecall_generate_shared_key(int fd);
+    };
+
+    untrusted {
+        int ocall_clock_gettime(int a, [out, size=16, count=1] struct timespec *sp);
+        /* define OCALLs here. */
+        int ocall_fflush([user_check] FILE *ptr);
+        size_t ocall_fwrite([in, size=size, count=count] const void *buffer, size_t size, size_t count, [user_check]FILE *fd);
+        FILE *ocall_fopen([in, string] const char *filename, [in, string] const char *mode);
+        void ocall_exit(int status_);
+        int ocall_fclose([user_check] FILE *ptr);
+        long int ocall_ftell([user_check] FILE *stream);
+        int ocall_fseek([user_check] FILE *stream, long int offset, int whence);
+        void ocall_clearerr([user_check] FILE *stream);
+        size_t ocall_fread([in, out, size=size1, count=nmemb] void *ptr, size_t size1, size_t nmemb, [user_check] FILE *stream);
+        int ocall_ferror([user_check] FILE *ptr);
+        int ocall_getc([user_check] FILE *stream);
+        int ocall_ungetc(int ch, [user_check] FILE *stream);
+        int ocall_rand();                                               // done in sgx
+        void ocall_srand(unsigned int seed);                            // done in sgx
+        size_t ocall_read(int fd, [in, out ,size=1, count=s] void *ptr, size_t s);
+        size_t ocall_write(int fd, [in, out ,size=1, count=s] void *ptr, size_t s);
+        void ocall_send_packet(int32_t sfd, [in, out, count=1, size=len]uint8_t *pkt, size_t len);
+    };
+};
